@@ -1,0 +1,44 @@
+[project]
+name = "paper-fetch-mcp"
+version = "0.1.0"
+description = "MCP server for full-text access to research papers: local corpus lookup, online publisher/arXiv fetch, Semantic Scholar and alphaXiv."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "arxiv>=2.4.0",
+    "beautifulsoup4>=4.14.3",
+    "bibtexparser>=1.4.0,<2",
+    "fastmcp>=3.1.1,<4",
+    "httpx>=0.28.1",
+    "markdownify>=1.2.2",
+    "pypdf>=5.0.0",
+    "pysocks>=1.7.1",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+    "selenium>=4.41.0",
+    "webdriver-manager>=4.0.2",
+    "websocket-client>=1.9.0",
+]
+
+[project.scripts]
+paper-fetch-mcp = "paper_fetch_mcp.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["paper_fetch_mcp*"]
+
+[tool.pytest.ini_options]
+testpaths = ["paper_fetch_mcp/tests"]
+markers = [
+    "smoke: opt-in HTTP smoke test that boots a real PaperFetchServer subprocess on an ephemeral port (PAPER_FETCH_SMOKE=1 to run; see paper_fetch_mcp/tests/test_smoke_http.py)",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "requests-mock>=1.12.1",
+]

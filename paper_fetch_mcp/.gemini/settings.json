@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "agentic-rag-mcp": {
+      "command": "uv",
+      "args": [
+        "run",
+        "python",
+        "-m",
+        "paper_fetch_mcp"
+      ]
+    }
+  }
+}

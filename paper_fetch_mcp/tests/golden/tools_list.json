@@ -1,0 +1,611 @@
+{
+  "_meta": {
+    "description": "Golden contract snapshot for PaperFetchServer's live tool surface. 'tools' is regenerated live at test time from mcp.list_tools() and diffed against this file. 'response_key_paths' is documentation derived by reading tool bodies (not called live) -- see the 'source' citation on each entry.",
+    "reblessing": "Set UPDATE_TOOL_CONTRACT=1 and rerun paper_fetch_mcp/tests/test_tool_contract.py to rewrite this file from the current live state. Any diff is a deliberate, reviewed change -- review it like code."
+  },
+  "response_key_paths": {
+    "get_paper": {
+      "paths": [
+        "found",
+        "content",
+        "paging.truncated"
+      ],
+      "source": "core/papers.py `get_paper` returns {found, citation_key, id, doi, title, content, paging: {offset, returned_chars, total_chars, truncated}}; tools/content.py passes it to `output.respond(result)` (or core/online.py's envelope on a corpus miss, which carries the same found/content/paging keys)."
+    },
+    "semantic_scholar_search": {
+      "paths": [
+        "papers[].title"
+      ],
+      "source": "core/s2.py requests the title field from the Semantic Scholar API and returns {'ok': True, 'data': {'total': ..., 'papers': [...]}}; tools/external.py's semantic_scholar_search then does `output.respond({'total': ..., 'papers': data.get('papers', [])}, list_key='papers')`."
+    }
+  },
+  "tools": {
+    "alphaxiv_batch_lookup": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "max_chars": {
+            "default": 2000,
+            "description": "Truncate each paper's overview/full_text to this many\ncharacters (default 2000 -- batch responses overflowed 100% of\nthe time before this limit existed).",
+            "type": "integer"
+          },
+          "paper_ids_or_urls": {
+            "description": "List of ArXiv IDs, versioned IDs, or URLs (max\n20).",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "paper_ids_or_urls"
+        ],
+        "type": "object"
+      }
+    },
+    "alphaxiv_paper_lookup": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "max_chars": {
+            "default": 15000,
+            "description": "Truncate the fetched overview/full_text to this many\ncharacters (default 15000).",
+            "type": "integer"
+          },
+          "paper_id_or_url": {
+            "description": "An ArXiv ID, versioned ID, or URL.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id_or_url"
+        ],
+        "type": "object"
+      }
+    },
+    "append_bibtex_entries": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "citation_keys": {
+            "description": "List of citation keys to extract.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "reference_path": {
+            "description": "Path to the destination .bib file.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "citation_keys",
+          "reference_path"
+        ],
+        "type": "object"
+      }
+    },
+    "doi2content": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "doi": {
+            "description": "The DOI of the paper (e.g., \"10.1109/...\").",
+            "type": "string"
+          }
+        },
+        "required": [
+          "doi"
+        ],
+        "type": "object"
+      }
+    },
+    "download_arxiv": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "List of ArXiv IDs (e.g., [\"2310.12345\"]). Maximum 10 per\nrequest; extra ids beyond the 10th are dropped.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      }
+    },
+    "fetch_publisher_html": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "force_refresh": {
+            "default": false,
+            "description": "If True, skip the cache and re-fetch from the\npublisher.",
+            "type": "boolean"
+          },
+          "identifier": {
+            "description": "A DOI (e.g. \"10.1109/TWC.2024.001\"), a Semantic\nScholar paperId, or a direct publisher URL.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      }
+    },
+    "get_content_by_citation_key": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "citation_keys": {
+            "description": "List of citation keys (e.g., [\"Author2023Title\"]).\n           Maximum 20 keys per request.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sections": {
+            "default": [
+              "*"
+            ],
+            "description": "List of sections to retrieve. Options:\n      - \"*\": All available text chunks.\n      - \"abstract\": Abstract from database.\n      - \"Introduction\", \"Experiment\", \"Conclusion\",\n        \"Proposed_System\": specific chunks.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "citation_keys"
+        ],
+        "type": "object"
+      }
+    },
+    "get_image_path": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "citation_key": {
+            "description": "The paper's citation key.",
+            "type": "string"
+          },
+          "figure_id": {
+            "description": "The figure filename (e.g., \"chunk_0_img-0.jpg\").",
+            "type": "string"
+          }
+        },
+        "required": [
+          "citation_key",
+          "figure_id"
+        ],
+        "type": "object"
+      }
+    },
+    "get_paper": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "description": "A citation key, DOI (any form -- normalised), arXiv id\n(bare, \"arXiv:\"-prefixed, or a full arxiv.org URL), or paper\ntitle.",
+            "type": "string"
+          },
+          "max_chars_per_paper": {
+            "default": 12000,
+            "description": "Maximum content characters to return in one\ncall (default 12000).",
+            "type": "integer"
+          },
+          "offset": {
+            "default": 0,
+            "description": "Character offset into the assembled content to start the\nreturned window at (default 0) -- page through a long paper\nwith repeated calls, e.g. `offset=12000`, `offset=24000`, ...",
+            "type": "integer"
+          },
+          "save_path": {
+            "default": "",
+            "description": "Optional file (or directory) to write the paper's FULL\ncontent to -- the whole assembled paper, not just the window\nthis call returns, so one call with `save_path` gets a long\npaper onto disk without paging it through the tool result.\nWorks for an online hit too (what was fetched is written).\nA relative path is resolved under `PAPER_SAVE_DIR`\n(default `<repo>/saved_papers`), an absolute path is used\nas given; a path that is an existing directory, ends with\n\"/\", or has no extension is treated as a directory and the\nfile inside it is named `<citation_key>.md`. Missing parents\nare created; an existing file is overwritten (`overwrote:\ntrue` in the report).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      }
+    },
+    "ingest_arxiv": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "List of ArXiv IDs (e.g., [\"2310.12345\"]). Maximum 10 per\nrequest; extra ids beyond the 10th are dropped.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      }
+    },
+    "job_status": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "job_id": {
+            "description": "The job id returned by ingest_arxiv/download_arxiv.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "type": "object"
+      }
+    },
+    "list_figures": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "citation_key": {
+            "description": "The paper's citation key (or its directory id).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "citation_key"
+        ],
+        "type": "object"
+      }
+    },
+    "search_metadata": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Author name substring filter."
+          },
+          "limit": {
+            "default": 20,
+            "description": "Maximum results (1-100, default 20).",
+            "type": "integer"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Free-text search across title/abstract/author (FTS5 when\ninitialised, else LIKE)."
+          },
+          "year_from": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive lower publication-year bound."
+          },
+          "year_to": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Inclusive upper publication-year bound."
+          }
+        },
+        "type": "object"
+      }
+    },
+    "semantic_scholar_paper": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "description": "A DOI (e.g. \"10.1109/TWC.2024.001\"), an arXiv id (e.g.\n\"2301.12345\", \"arXiv:2301.12345\"), or a Semantic Scholar paper\nid.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      }
+    },
+    "semantic_scholar_search": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "fields_of_study": {
+            "default": "",
+            "description": "Optional comma-separated field-of-study filter\n(e.g. \"Computer Science,Engineering\").",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "description": "Number of results (1-100, default 10).",
+            "type": "integer"
+          },
+          "query": {
+            "description": "Search query string.",
+            "type": "string"
+          },
+          "venue": {
+            "default": "",
+            "description": "Optional venue filter. Must be an EXACT venue name as\nSemantic Scholar stores it (e.g., \"IEEE Transactions on\nWireless Communications\", \"Neural Information Processing\nSystems\"). Comma-separated for multiple venues. Substrings\nlike \"IEEE\" will return zero results.",
+            "type": "string"
+          },
+          "year": {
+            "default": "",
+            "description": "Optional year filter -- a single year (\"2023\") or a range\n(\"2019-2023\", \"2019-\", \"-2023\").",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      }
+    },
+    "server_status": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      }
+    },
+    "symlink_references_bib": {
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "parameters": {
+        "additionalProperties": false,
+        "properties": {
+          "source_dir": {
+            "description": "Directory containing the source references.bib.",
+            "type": "string"
+          },
+          "target_dir": {
+            "description": "Directory where the symlink should be created.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_dir",
+          "target_dir"
+        ],
+        "type": "object"
+      }
+    }
+  }
+}

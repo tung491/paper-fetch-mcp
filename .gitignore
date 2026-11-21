@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+*.egg-info
+.venv
+.pytest_cache/
+
+# Secrets
+.env
+paper_fetch_mcp/.env
+
+# Server state, logs, caches
+.state/
+.cache/
+*.log
+*.pid
+*.db
+
+# Papers written out by get_paper(save_path=...)
+saved_papers/
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
